@@ -27,14 +27,14 @@ func (r *StorageClusterReconciler) newCephFilesystemInstances(initData *ocsv1.St
 			Spec: cephv1.FilesystemSpec{
 				MetadataPool: cephv1.PoolSpec{
 					Replicated: cephv1.ReplicatedSpec{
-						Size: 3,
+						Size: 1,
 					},
 					FailureDomain: initData.Status.FailureDomain,
 				},
 				DataPools: []cephv1.PoolSpec{
 					{
 						Replicated: cephv1.ReplicatedSpec{
-							Size:            3,
+							Size:            1,
 							TargetSizeRatio: .49,
 						},
 						FailureDomain: initData.Status.FailureDomain,

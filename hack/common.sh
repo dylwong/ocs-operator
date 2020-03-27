@@ -3,6 +3,10 @@
 # shellcheck disable=SC2034
 # disable unused variable warnings
 
+export OCS_IMAGE=quay.io/mulbc/ocs-operator
+export REGISTRY_NAMESPACE=mulbc
+export IMAGE_TAG=katacoda-46
+
 GO111MODULE="on"
 GOPROXY="https://proxy.golang.org"
 GOROOT="${GOROOT:-go env GOROOT}"
@@ -10,15 +14,15 @@ GOOS="${GOOS:-linux}"
 GOARCH="${GOARCH:-amd64}"
 
 # Current DEV version of the CSV
-DEFAULT_CSV_VERSION="4.8.0"
+DEFAULT_CSV_VERSION="9.9.0"
 CSV_VERSION="${CSV_VERSION:-${DEFAULT_CSV_VERSION}}"
 
 IMAGE_BUILD_CMD="${IMAGE_BUILD_CMD}"
 if [ -z "$IMAGE_BUILD_CMD" ]; then
-    IMAGE_BUILD_CMD=$(command -v docker || echo "")
+	IMAGE_BUILD_CMD=$(command -v docker || echo "")
 fi
 if [ -z "$IMAGE_BUILD_CMD" ]; then
-    IMAGE_BUILD_CMD=$(command -v podman || echo "")
+	IMAGE_BUILD_CMD=$(command -v podman || echo "")
 fi
 
 IMAGE_RUN_CMD="${IMAGE_RUN_CMD:-${IMAGE_BUILD_CMD} run --rm -it}"
@@ -54,8 +58,8 @@ ROOK_CSV="$OUTDIR_TEMPLATES/rook-csv.yaml.in"
 OCS_CSV="$OUTDIR_TEMPLATES/ocs-operator.csv.yaml.in"
 
 LATEST_ROOK_IMAGE="rook/ceph:v1.5.0.179.g8c0f70c"
-LATEST_NOOBAA_IMAGE="noobaa/noobaa-operator:5.7.0-20201216"
-LATEST_NOOBAA_CORE_IMAGE="noobaa/noobaa-core:5.7.0-20201216"
+LATEST_NOOBAA_IMAGE="noobaa/noobaa-operator:5.7.0-20200126"
+LATEST_NOOBAA_CORE_IMAGE="noobaa/noobaa-core:5.7.0-20200126"
 LATEST_NOOBAA_DB_IMAGE="centos/mongodb-36-centos7"
 # The stretch cluster feature will come in ceph pacific(v16).  We don't have an
 # image for it yet. Meanwhile, we will use an image that has the required
@@ -64,8 +68,8 @@ LATEST_NOOBAA_DB_IMAGE="centos/mongodb-36-centos7"
 LATEST_CEPH_IMAGE="travisn/ceph:stretch-demo-5"
 
 DEFAULT_IMAGE_REGISTRY="quay.io"
-DEFAULT_REGISTRY_NAMESPACE="ocs-dev"
-DEFAULT_IMAGE_TAG="latest"
+DEFAULT_REGISTRY_NAMESPACE="${REGISTRY_NAMESPACE}"
+DEFAULT_IMAGE_TAG="${IMAGE_TAG}"
 DEFAULT_OPERATOR_IMAGE_NAME="ocs-operator"
 DEFAULT_OPERATOR_BUNDLE_NAME="ocs-operator-bundle"
 DEFAULT_OPERATOR_INDEX_NAME="ocs-operator-index"

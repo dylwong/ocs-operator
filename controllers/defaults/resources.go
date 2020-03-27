@@ -11,72 +11,72 @@ var (
 	DaemonResources = map[string]corev1.ResourceRequirements{
 		"osd": {
 			Requests: corev1.ResourceList{
-				corev1.ResourceCPU:    resource.MustParse("2"),
-				corev1.ResourceMemory: resource.MustParse("5Gi"),
+				// corev1.ResourceCPU:    resource.MustParse("1"),
+				// corev1.ResourceMemory: resource.MustParse("4Gi"),
 			},
 			Limits: corev1.ResourceList{
-				corev1.ResourceCPU:    resource.MustParse("2"),
-				corev1.ResourceMemory: resource.MustParse("5Gi"),
+				// corev1.ResourceCPU:    resource.MustParse("2"),
+				// corev1.ResourceMemory: resource.MustParse("8Gi"),
 			},
 		},
 		"mon": {
 			Requests: corev1.ResourceList{
-				corev1.ResourceCPU:    resource.MustParse("1"),
-				corev1.ResourceMemory: resource.MustParse("2Gi"),
+				// corev1.ResourceCPU:    resource.MustParse("1"),
+				// corev1.ResourceMemory: resource.MustParse("2Gi"),
 			},
 			Limits: corev1.ResourceList{
-				corev1.ResourceCPU:    resource.MustParse("1"),
-				corev1.ResourceMemory: resource.MustParse("2Gi"),
+				// corev1.ResourceCPU:    resource.MustParse("1"),
+				// corev1.ResourceMemory: resource.MustParse("2Gi"),
 			},
 		},
 		"mds": {
 			Requests: corev1.ResourceList{
-				corev1.ResourceCPU:    resource.MustParse("3"),
-				corev1.ResourceMemory: resource.MustParse("8Gi"),
+				// corev1.ResourceCPU:    resource.MustParse("3"),
+				// corev1.ResourceMemory: resource.MustParse("8Gi"),
 			},
 			Limits: corev1.ResourceList{
-				corev1.ResourceCPU:    resource.MustParse("3"),
-				corev1.ResourceMemory: resource.MustParse("8Gi"),
+				// corev1.ResourceCPU:    resource.MustParse("3"),
+				// corev1.ResourceMemory: resource.MustParse("8Gi"),
 			},
 		},
 		"rgw": {
 			Requests: corev1.ResourceList{
-				corev1.ResourceCPU:    resource.MustParse("2"),
-				corev1.ResourceMemory: resource.MustParse("4Gi"),
+				// corev1.ResourceCPU:    resource.MustParse("2"),
+				// corev1.ResourceMemory: resource.MustParse("4Gi"),
 			},
 			Limits: corev1.ResourceList{
-				corev1.ResourceCPU:    resource.MustParse("2"),
-				corev1.ResourceMemory: resource.MustParse("4Gi"),
+				// corev1.ResourceCPU:    resource.MustParse("2"),
+				// corev1.ResourceMemory: resource.MustParse("4Gi"),
 			},
 		},
 		"mgr": {
 			Requests: corev1.ResourceList{
-				corev1.ResourceCPU:    resource.MustParse("1"),
-				corev1.ResourceMemory: resource.MustParse("3Gi"),
+				// corev1.ResourceCPU:    resource.MustParse("1"),
+				// corev1.ResourceMemory: resource.MustParse("3Gi"),
 			},
 			Limits: corev1.ResourceList{
-				corev1.ResourceCPU:    resource.MustParse("1"),
-				corev1.ResourceMemory: resource.MustParse("3Gi"),
+				// corev1.ResourceCPU:    resource.MustParse("1"),
+				// corev1.ResourceMemory: resource.MustParse("3Gi"),
 			},
 		},
 		"noobaa-core": {
 			Requests: corev1.ResourceList{
-				corev1.ResourceCPU:    resource.MustParse("1"),
-				corev1.ResourceMemory: resource.MustParse("4Gi"),
+				// corev1.ResourceCPU:    resource.MustParse("2"),
+				// corev1.ResourceMemory: resource.MustParse("4Gi"),
 			},
 			Limits: corev1.ResourceList{
-				corev1.ResourceCPU:    resource.MustParse("1"),
-				corev1.ResourceMemory: resource.MustParse("4Gi"),
+				// corev1.ResourceCPU:    resource.MustParse("2"),
+				// corev1.ResourceMemory: resource.MustParse("4Gi"),
 			},
 		},
 		"noobaa-db": {
 			Requests: corev1.ResourceList{
-				corev1.ResourceCPU:    resource.MustParse("500m"),
-				corev1.ResourceMemory: resource.MustParse("4Gi"),
+				// corev1.ResourceCPU:    resource.MustParse("2"),
+				// corev1.ResourceMemory: resource.MustParse("4Gi"),
 			},
 			Limits: corev1.ResourceList{
-				corev1.ResourceCPU:    resource.MustParse("500m"),
-				corev1.ResourceMemory: resource.MustParse("4Gi"),
+				// corev1.ResourceCPU:    resource.MustParse("2"),
+				// corev1.ResourceMemory: resource.MustParse("4Gi"),
 			},
 		},
 		"noobaa-db-vol": {

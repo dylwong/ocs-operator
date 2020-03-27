@@ -138,14 +138,14 @@ func (r *StorageClusterReconciler) newCephObjectStoreInstances(initData *ocsv1.S
 				DataPool: cephv1.PoolSpec{
 					FailureDomain: initData.Status.FailureDomain,
 					Replicated: cephv1.ReplicatedSpec{
-						Size:            3,
+						Size:            1,
 						TargetSizeRatio: .49,
 					},
 				},
 				MetadataPool: cephv1.PoolSpec{
 					FailureDomain: initData.Status.FailureDomain,
 					Replicated: cephv1.ReplicatedSpec{
-						Size: 3,
+						Size: 1,
 					},
 				},
 				Gateway: cephv1.GatewaySpec{

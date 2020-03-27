@@ -23,7 +23,7 @@ func generateCephReplicatedSpec(initData *ocsv1.StorageCluster) cephv1.Replicate
 		}
 	}
 	return cephv1.ReplicatedSpec{
-		Size:            3,
+		Size:            1,
 		TargetSizeRatio: .49,
 	}
 }

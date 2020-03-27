@@ -21,13 +21,13 @@ const (
 
 var (
 	// DefaultMonCount is the number of monitors to be configured for the CephCluster
-	DefaultMonCount = 3
+	DefaultMonCount = 1
 	// ArbiterModeMonCount is the number of monitors to be configured for the CephCluster in arbiter mode
 	ArbiterModeMonCount = 5
 	// DeviceSetReplica is the default number of Rook-Ceph
 	// StorageClassDeviceSets per StorageCluster StorageDeviceSet
 	// This is equal to the default number of failure domains for OSDs
-	DeviceSetReplica = 3
+	DeviceSetReplica = 1
 	// CephObjectStoreGatewayInstances is the default number of RGW instances to create
 	CephObjectStoreGatewayInstances = 1
 	// IsUnsupportedCephVersionAllowed is a string that determines if the CephCluster should allow unsupported ceph version image

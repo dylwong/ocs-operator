@@ -21,7 +21,7 @@ spec:
         app.kubernetes.io/version: 0.0.1
     spec:
       containers:
-      - image: quay.io/ocs-dev/ocs-operator
+      - image: quay.io/mulbc/ocs-operator:katacoda-46
         name: ocs-metrics-exporter
         ports:
         - containerPort: 8080

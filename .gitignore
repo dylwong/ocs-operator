@@ -12,7 +12,6 @@
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
 
-
 ### Vim ###
 # Swap
 [._]*.s[a-v][a-z]
@@ -55,3 +54,5 @@ tools/csv-checksum/csv-checksum
 tools/cluster-deploy/cluster-deploy
 tools/shellcheck
 metrics/mixin/build/vendor
+
+.vscode

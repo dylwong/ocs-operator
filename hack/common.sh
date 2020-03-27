@@ -3,6 +3,11 @@
 # shellcheck disable=SC2034
 # disable unused variable warnings
 
+
+export OCS_IMAGE=quay.io/mulbc/ocs-operator
+export REGISTRY_NAMESPACE=mulbc
+export IMAGE_TAG=katacoda-44
+
 GO111MODULE="on"
 GOPROXY="https://proxy.golang.org"
 GOROOT="${GOROOT:-go env GOROOT}"

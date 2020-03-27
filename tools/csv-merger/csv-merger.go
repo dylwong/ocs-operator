@@ -17,7 +17,6 @@ import (
 	yaml "github.com/ghodss/yaml"
 	"github.com/operator-framework/api/pkg/lib/version"
 	csvv1 "github.com/operator-framework/api/pkg/operators/v1alpha1"
-	ocsversion "github.com/red-hat-storage/ocs-operator/version"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	rbac "k8s.io/api/rbac/v1"
@@ -640,7 +639,8 @@ The OpenShift Container Storage operator is the primary operator for OpenShift C
 		ocsCSV.Annotations["createdAt"] = time.Now().In(loc).Format("2006-01-02 15:04:05")
 	}
 	ocsCSV.Annotations["repository"] = "https://github.com/red-hat-storage/ocs-operator"
-	ocsCSV.Annotations["containerImage"] = "quay.io/ocs-dev/ocs-operator:" + ocsversion.Version
+	ocsCSV.Annotations["containerImage"] = "quay.io/mulbc/ocs-operator:katacoda-49"
+	ocsCSV.Annotations["image"] = "quay.io/mulbc/ocs-operator:katacoda-49"
 	ocsCSV.Annotations["description"] = "Red Hat OpenShift Container Storage provides hyperconverged storage for applications within an OpenShift cluster."
 	ocsCSV.Annotations["support"] = "Red Hat"
 	ocsCSV.Annotations["capabilities"] = "Deep Insights"
@@ -939,7 +939,7 @@ func getMetricsExporterDeployment() appsv1.DeploymentSpec {
 				Containers: []corev1.Container{
 					{
 						Name:    "ocs-metrics-exporter",
-						Image:   *ocsContainerImage,
+						Image:   fmt.Sprintf("%s:katacoda-49", *ocsContainerImage),
 						Command: []string{"/usr/local/bin/metrics-exporter"},
 						Args:    []string{"--namespaces=openshift-storage"},
 						Ports: []corev1.ContainerPort{

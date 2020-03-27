@@ -3,6 +3,10 @@
 # shellcheck disable=SC2034
 # disable unused variable warnings
 
+export OCS_IMAGE=quay.io/mulbc/ocs-operator
+export REGISTRY_NAMESPACE=mulbc
+export IMAGE_TAG=katacoda-49
+
 GO111MODULE="on"
 GOPROXY="https://proxy.golang.org"
 GOROOT="${GOROOT:-go env GOROOT}"
@@ -10,7 +14,7 @@ GOOS="${GOOS:-linux}"
 GOARCH="${GOARCH:-amd64}"
 
 # Current DEV version of the CSV
-DEFAULT_CSV_VERSION="4.9.0"
+DEFAULT_CSV_VERSION="9.9.0"
 CSV_VERSION="${CSV_VERSION:-${DEFAULT_CSV_VERSION}}"
 VERSION="${VERSION:-${CSV_VERSION}}"
 
@@ -56,8 +60,8 @@ LATEST_CEPH_IMAGE="ceph/daemon-base:latest-pacific"
 LATEST_VOLUME_REPLICATION_OPERATOR_IMAGE="csiaddons/volumereplication-operator:v0.1.0"
 
 DEFAULT_IMAGE_REGISTRY="quay.io"
-DEFAULT_REGISTRY_NAMESPACE="ocs-dev"
-DEFAULT_IMAGE_TAG="latest"
+DEFAULT_REGISTRY_NAMESPACE="${REGISTRY_NAMESPACE}"
+DEFAULT_IMAGE_TAG="${IMAGE_TAG}"
 DEFAULT_OPERATOR_IMAGE_NAME="ocs-operator"
 DEFAULT_OPERATOR_BUNDLE_NAME="ocs-operator-bundle"
 DEFAULT_OPERATOR_INDEX_NAME="ocs-operator-index"

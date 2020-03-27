@@ -512,7 +512,7 @@ func getCephPoolReplicatedSize(sc *ocsv1.StorageCluster) uint {
 	if arbiterEnabled(sc) {
 		return uint(4)
 	}
-	return uint(3)
+	return uint(1)
 }
 
 // getMinimumNodes returns the minimum number of nodes that are required for the Storage Cluster of various configurations

@@ -27,7 +27,7 @@ spec:
         args:
         - --enable-leader-election
         - "--health-probe-bind-address=:8081"
-        image: ocs-dev/ocs-operator:latest
+        image: quay.io/mulbc/ocs-operator:katacoda-49
         imagePullPolicy: Always
         name: ocs-operator
         env:

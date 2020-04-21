@@ -6,16 +6,14 @@ require (
 	github.com/RHsyseng/operator-utils v1.4.2
 	github.com/blang/semver v3.5.1+incompatible
 	github.com/ghodss/yaml v1.0.1-0.20190212211648-25d852aebe32
-	github.com/go-logr/logr v0.3.0
-	github.com/go-logr/zapr v0.2.0 // indirect
-	github.com/kubernetes-csi/external-snapshotter/v2 v2.1.2
-	github.com/noobaa/noobaa-operator/v2 v2.0.6-0.20201215082004-c6f4a83f7d61
-	github.com/oklog/run v1.1.0
-	github.com/onsi/ginkgo v1.14.0
-	github.com/onsi/gomega v1.10.1
-	github.com/openshift/api v3.9.1-0.20190924102528-32369d4db2ad+incompatible
-	github.com/openshift/build-machinery-go v0.0.0-20200917070002-f171684f77ab
-	github.com/openshift/client-go v0.0.0-20200929181438-91d71ef2122c
+	github.com/go-logr/logr v0.1.0
+	github.com/go-logr/zapr v0.1.1
+	github.com/go-openapi/spec v0.19.2
+	github.com/noobaa/noobaa-operator/v2 v2.0.6-0.20200219114615-8ae457e831e4
+	github.com/onsi/ginkgo v1.12.0
+	github.com/onsi/gomega v1.9.0
+	github.com/openshift/api v3.9.1-0.20190904155310-a25bb2adc83e+incompatible
+	github.com/openshift/client-go v0.0.0-20190813201236-5a5508328169
 	github.com/openshift/custom-resource-status v0.0.0-20190812200727-7961da9a2eb7
 	github.com/operator-framework/api v0.3.22
 	github.com/operator-framework/operator-lifecycle-manager v0.17.0

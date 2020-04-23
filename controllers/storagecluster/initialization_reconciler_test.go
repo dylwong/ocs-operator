@@ -4,10 +4,7 @@ import (
 	"context"
 	"testing"
 
-	snapapi "github.com/kubernetes-csi/external-snapshotter/v2/pkg/apis/volumesnapshot/v1beta1"
 	nbv1 "github.com/noobaa/noobaa-operator/v2/pkg/apis/noobaa/v1alpha1"
-	configv1 "github.com/openshift/api/config/v1"
-	consolev1 "github.com/openshift/api/console/v1"
 	openshiftv1 "github.com/openshift/api/template/v1"
 	api "github.com/openshift/ocs-operator/api/v1"
 	monitoringv1 "github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring/v1"
@@ -189,18 +186,5 @@ func createFakeInitializationScheme(t *testing.T, obj ...runtime.Object) *runtim
 	if err != nil {
 		assert.Fail(t, "failed to add openshiftv1 scheme")
 	}
-	err = snapapi.AddToScheme(scheme)
-	if err != nil {
-		assert.Fail(t, "failed to add volume-snapshot scheme")
-	}
-	err = monitoringv1.AddToScheme(scheme)
-	if err != nil {
-		assert.Fail(t, "failed to add monitoringv1 scheme")
-	}
-	err = consolev1.AddToScheme(scheme)
-	if err != nil {
-		assert.Fail(t, "failed to add consolev1 scheme")
-	}
-
 	return scheme
 }

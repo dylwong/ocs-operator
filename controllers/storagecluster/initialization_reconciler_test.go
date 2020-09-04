@@ -25,6 +25,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 )
 
+var logt = logf.Log.WithName("controller_storageclusterinitialization_test")
+
 func createDefaultStorageCluster() *api.StorageCluster {
 	return createStorageCluster("ocsinit", "zone", []string{"zone1", "zone2", "zone3"})
 }

@@ -51,26 +51,6 @@ type StorageClusterSpec struct {
 	// ManagedResources specifies how to deal with auxiliary resources reconciled
 	// with the StorageCluster
 	ManagedResources ManagedResourcesSpec `json:"managedResources,omitempty"`
-	// If enabled, sets the failureDomain to host, allowing devices to be
-	// distributed evenly across all nodes, regardless of distribution in zones
-	// or racks.
-	FlexibleScaling bool `json:"flexibleScaling,omitempty"`
-	// NodeTopologies specifies the nodes available for the storage cluster,
-	// preferred failure domain and location for the arbiter resources. This is
-	// optional for non-arbiter clusters. For arbiter clusters, the
-	// arbiterLocation is required; failure domain and the node labels are
-	// optional. When the failure domain and the node labels are missing, the
-	// ocs-operator makes a best effort to determine them automatically.
-	NodeTopologies *NodeTopologyMap `json:"nodeTopologies,omitempty"`
-	// ArbiterSpec specifies the storage cluster options related to arbiter.
-	// If Arbiter is enabled, ArbiterLocation in the NodeTopologies must be specified.
-	Arbiter ArbiterSpec `json:"arbiter,omitempty"`
-}
-
-// KeyManagementServiceSpec provides a way to enable KMS
-type KeyManagementServiceSpec struct {
-	// +optional
-	Enable bool `json:"enable,omitempty"`
 }
 
 // ManagedResourcesSpec defines how to reconcile auxiliary resources
@@ -79,31 +59,37 @@ type ManagedResourcesSpec struct {
 	CephFilesystems      ManageCephFilesystems      `json:"cephFilesystems,omitempty"`
 	CephObjectStores     ManageCephObjectStores     `json:"cephObjectStores,omitempty"`
 	CephObjectStoreUsers ManageCephObjectStoreUsers `json:"cephObjectStoreUsers,omitempty"`
+	SnapshotClasses      ManageSnapshotClasses      `json:"snapshotClasses,omitempty"`
+	StorageClasses       ManageStorageClasses       `json:"storageClasses,omitempty"`
 }
 
 // ManageCephBlockPools defines how to reconcilea CephBlockPools
 type ManageCephBlockPools struct {
-	ReconcileStrategy    string `json:"reconcileStrategy,omitempty"`
-	DisableStorageClass  bool   `json:"disableStorageClass,omitempty"`
-	DisableSnapshotClass bool   `json:"disableSnapshotClass,omitempty"`
+	ReconcileStrategy string `json:"reconcileStrategy,omitempty"`
 }
 
 // ManageCephFilesystems defines how to reconcile CephFilesystems
 type ManageCephFilesystems struct {
-	ReconcileStrategy    string `json:"reconcileStrategy,omitempty"`
-	DisableStorageClass  bool   `json:"disableStorageClass,omitempty"`
-	DisableSnapshotClass bool   `json:"disableSnapshotClass,omitempty"`
+	ReconcileStrategy string `json:"reconcileStrategy,omitempty"`
 }
 
 // ManageCephObjectStores defines how to reconcile CephObjectStores
 type ManageCephObjectStores struct {
-	ReconcileStrategy   string `json:"reconcileStrategy,omitempty"`
-	DisableStorageClass bool   `json:"disableStorageClass,omitempty"`
-	GatewayInstances    int32  `json:"gatewayInstances,omitempty"`
+	ReconcileStrategy string `json:"reconcileStrategy,omitempty"`
 }
 
 // ManageCephObjectStoreUsers defines how to reconcile CephObjectStoreUsers
 type ManageCephObjectStoreUsers struct {
+	ReconcileStrategy string `json:"reconcileStrategy,omitempty"`
+}
+
+// ManageSnapshotClasses defines how to reconcile SnapshotClasses
+type ManageSnapshotClasses struct {
+	ReconcileStrategy string `json:"reconcileStrategy,omitempty"`
+}
+
+// ManageStorageClasses defines how to reconcile StorageClasses
+type ManageStorageClasses struct {
 	ReconcileStrategy string `json:"reconcileStrategy,omitempty"`
 }
 
@@ -217,22 +203,6 @@ type StorageClusterStatus struct {
 
 	// ExternalSecretHash holds the checksum value of external secret data.
 	ExternalSecretHash string `json:"externalSecretHash,omitempty"`
-
-	// Images holds the image reconcile status for all images reconciled by the operator
-	Images ImagesStatus `json:"images,omitempty"`
-}
-
-// ImagesStatus maps every component image name it's reconciliation status information
-type ImagesStatus struct {
-	Ceph       *ComponentImageStatus `json:"ceph,omitempty"`
-	NooBaaCore *ComponentImageStatus `json:"noobaaCore,omitempty"`
-	NooBaaDB   *ComponentImageStatus `json:"noobaaDB,omitempty"`
-}
-
-// ComponentImageStatus holds image status information for a specific component image
-type ComponentImageStatus struct {
-	DesiredImage string `json:"desiredImage,omitempty"`
-	ActualImage  string `json:"actualImage,omitempty"`
 }
 
 // TopologyLabelValues is a list of values for a topology label

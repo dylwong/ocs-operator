@@ -83,6 +83,17 @@ osd_memory_target_cgroup_limit_ratio = 0.5
 
 	// EBS represents AWS EBS provisioner for StorageClass
 	EBS StorageClassProvisionerType = "kubernetes.io/aws-ebs"
+	//Name of MetadataPVCTemplate
+	metadataPVCName = "metadata"
+
+	// ReconcileStrategyUnknown is the same as default
+	ReconcileStrategyUnknown ReconcileStrategy = ""
+	// ReconcileStrategyDefault means reconcile once and ignore if it exists
+	ReconcileStrategyDefault ReconcileStrategy = "default"
+	// ReconcileStrategyIgnore means never reconcile
+	ReconcileStrategyIgnore ReconcileStrategy = "ignore"
+	// ReconcileStrategyManage means always reconcile
+	ReconcileStrategyManage ReconcileStrategy = "manage"
 )
 
 var storageClusterFinalizer = "storagecluster.ocs.openshift.io"
@@ -273,10 +284,6 @@ func (r *StorageClusterReconciler) reconcilePhases(
 		if err := r.reconcileNodeTopologyMap(instance); err != nil {
 			r.Log.Error(err, "Failed to set node topology map")
 			return reconcile.Result{}, err
-		}
-
-		if instance.Status.FailureDomain == "" {
-			instance.Status.FailureDomain = determineFailureDomain(instance)
 		}
 	}
 

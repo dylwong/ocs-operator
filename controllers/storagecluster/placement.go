@@ -57,13 +57,13 @@ func getPlacement(sc *ocsv1.StorageCluster, component string) rookv1.Placement {
 	topologyKey, _ = topologyMap.GetKeyValues(topologyKey)
 	if component == "mon" || component == "mds" {
 		if placement.PodAntiAffinity.PreferredDuringSchedulingIgnoredDuringExecution != nil {
-			for i := range placement.PodAntiAffinity.PreferredDuringSchedulingIgnoredDuringExecution {
-				placement.PodAntiAffinity.PreferredDuringSchedulingIgnoredDuringExecution[i].PodAffinityTerm.TopologyKey = topologyKey
+			for _, weightedPodAffinityTerm := range placement.PodAntiAffinity.PreferredDuringSchedulingIgnoredDuringExecution {
+				weightedPodAffinityTerm.PodAffinityTerm.TopologyKey = topologyKey
 			}
 		}
 		if placement.PodAntiAffinity.RequiredDuringSchedulingIgnoredDuringExecution != nil {
-			for i := range placement.PodAntiAffinity.RequiredDuringSchedulingIgnoredDuringExecution {
-				placement.PodAntiAffinity.RequiredDuringSchedulingIgnoredDuringExecution[i].TopologyKey = topologyKey
+			for _, podAffinityTerm := range placement.PodAntiAffinity.RequiredDuringSchedulingIgnoredDuringExecution {
+				podAffinityTerm.TopologyKey = topologyKey
 			}
 		}
 	}

@@ -9,8 +9,8 @@ import (
 	"time"
 
 	yaml "github.com/ghodss/yaml"
-	v1 "github.com/operator-framework/api/pkg/operators/v1"
-	v1alpha1 "github.com/operator-framework/api/pkg/operators/v1alpha1"
+	v1 "github.com/operator-framework/operator-lifecycle-manager/pkg/api/apis/operators/v1"
+	v1alpha1 "github.com/operator-framework/operator-lifecycle-manager/pkg/api/apis/operators/v1alpha1"
 	"github.com/operator-framework/operator-lifecycle-manager/pkg/controller/install"
 	appsv1 "k8s.io/api/apps/v1"
 	k8sv1 "k8s.io/api/core/v1"

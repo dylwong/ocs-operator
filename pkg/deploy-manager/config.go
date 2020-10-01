@@ -5,7 +5,7 @@ import (
 	"os"
 
 	nbv1 "github.com/noobaa/noobaa-operator/v2/pkg/apis/noobaa/v1alpha1"
-	ocsv1 "github.com/openshift/ocs-operator/api/v1"
+	ocsv1 "github.com/openshift/ocs-operator/pkg/apis/ocs/v1"
 	olmclient "github.com/operator-framework/operator-lifecycle-manager/pkg/api/client/clientset/versioned"
 	rookcephv1 "github.com/rook/rook/pkg/apis/ceph.rook.io/v1"
 	rookclient "github.com/rook/rook/pkg/client/clientset/versioned"
@@ -44,40 +44,14 @@ func init() {
 	nbv1.SchemeBuilder.AddToScheme(scheme.Scheme)
 }
 
-type arbiterConfig struct {
-	Enabled bool
-	Zone    string
-}
-
-// storageClusterConfig stores the configuration of the Storage Cluster that is/will be
-// created by the deploy manager.
-type storageClusterConfig struct {
-	// As deploy manager is mainly used as a replacement for openshift/console,
-	// this should capture the options that are presented in the console for OCS
-	// installation.
-	// For example Encryption, Arbiter etc
-	// Eligibility Check:
-	// Is this option presented in the console and/or does this option cause a
-	// change in the initial Storage Cluster CR provided to the ocs-operator? Yes, it belongs here.
-
-	// Functional tests also use the deploy manager for deployment and if any
-	// state needs to be stored for the storageCluster, it belongs here.
-
-	// TODO: Move all the in-built defaults to this struct. These defaults are
-	// either hardcoded or are defined as globals in the deploy manager.
-
-	arbiterConf *arbiterConfig
-}
-
 // DeployManager is a util tool used by the functional tests
 type DeployManager struct {
-	olmClient          *olmclient.Clientset
-	k8sClient          *kubernetes.Clientset
-	rookClient         *rookclient.Clientset
-	ocsClient          *rest.RESTClient
-	crClient           crclient.Client
-	parameterCodec     runtime.ParameterCodec
-	storageClusterConf *storageClusterConfig
+	olmClient      *olmclient.Clientset
+	k8sClient      *kubernetes.Clientset
+	rookClient     *rookclient.Clientset
+	ocsClient      *rest.RESTClient
+	crClient       crclient.Client
+	parameterCodec runtime.ParameterCodec
 }
 
 // GetCrClient is the function used to retrieve the controller-runtime client

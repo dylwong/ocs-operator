@@ -1,7 +1,12 @@
 package functests
 
 import (
+	"flag"
+	"os"
+	"os/exec"
+
 	"github.com/onsi/gomega"
+	deploymanager "github.com/openshift/ocs-operator/pkg/deploy-manager"
 )
 
 // BeforeTestSuiteSetup is the function called to initialize the test environment
@@ -11,37 +16,41 @@ func BeforeTestSuiteSetup() {
 	err := DeployManager.DeployOCSWithOLM(OcsRegistryImage, OcsSubscriptionChannel)
 	gomega.Expect(err).To(gomega.BeNil())
 
-	debug("BeforeTestSuite: starting default StorageCluster\n")
-	err = DeployManager.StartDefaultStorageCluster()
+	debug("BeforeTestSuite: deploying OCS\n")
+	err = t.DeployOCSWithOLM(OcsRegistryImage, OcsSubscriptionChannel)
+	gomega.Expect(err).To(gomega.BeNil())
 
+	debug("BeforeTestSuite: starting default StorageCluster\n")
+	err = t.StartDefaultStorageCluster()
 	gomega.Expect(err).To(gomega.BeNil())
 
 	debug("BeforeTestSuite: creating Namespace %s\n", TestNamespace)
-	err = DeployManager.CreateNamespace(TestNamespace)
+	err = t.CreateNamespace(TestNamespace)
 	gomega.Expect(err).To(gomega.BeNil())
-
-	debug("------------------------------\n")
 }
 
 // AfterTestSuiteCleanup is the function called to tear down the test environment
 func AfterTestSuiteCleanup() {
+	flag.Parse()
 
-	debug("\n------------------------------\n")
+	t, err := deploymanager.NewDeployManager()
+	gomega.Expect(err).To(gomega.BeNil())
 
 	// collect debug log before deleting namespace & cluster
-	if SuiteFailed {
-		debug("AfterTestSuite: collecting debug information\n")
-		err := RunMustGather()
-		gomega.Expect(err).To(gomega.BeNil())
-	}
+	debug("AfterTestSuite: collecting debug information\n")
+	gopath := os.Getenv("GOPATH")
+	cmd := exec.Command("/bin/bash", gopath+"/src/github.com/openshift/ocs-operator/hack/dump-debug-info.sh")
+	cmd.Env = os.Environ()
+	output, err := cmd.CombinedOutput()
+	gomega.Expect(err).To(gomega.BeNil(), "error dumping debug info: %v", string(output))
 
 	debug("AfterTestSuite: deleting Namespace %s\n", TestNamespace)
-	err := DeployManager.DeleteNamespaceAndWait(TestNamespace)
+	err = t.DeleteNamespaceAndWait(TestNamespace)
 	gomega.Expect(err).To(gomega.BeNil())
 
 	if ocsClusterUninstall {
 		debug("AfterTestSuite: uninstalling OCS\n")
-		err = DeployManager.UninstallOCS(OcsRegistryImage, OcsSubscriptionChannel)
+		err = t.UninstallOCS(OcsRegistryImage, OcsSubscriptionChannel)
 		gomega.Expect(err).To(gomega.BeNil(), "error uninstalling OCS: %v", err)
 	}
 }
@@ -53,7 +62,7 @@ func AfterUpgradeTestSuiteCleanup() {
 	gomega.Expect(err).To(gomega.BeNil())
 
 	// Only called after upgrade failures, so the cluster has to be uninstalled.
-	err = DeployManager.UninstallOCS(OcsRegistryImage, OcsSubscriptionChannel)
+	err = t.UninstallOCS(OcsRegistryImage, OcsSubscriptionChannel)
 	gomega.Expect(err).To(gomega.BeNil())
 }
 

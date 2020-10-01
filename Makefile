@@ -137,6 +137,17 @@ build-functest:
 functest: build-functest
 	@echo "Running ocs developer functional test suite"
 	hack/functest.sh $(ARGS)
+gofmt:
+	@echo "Running gofmt"
+	gofmt -s -l `find . -path ./vendor -prune -o -type f -name '*.go' -print`
+
+golint:
+	@echo "Running go lint"
+	hack/lint.sh
+
+govet:
+	@echo "Running go vet"
+	go vet ./...
 
 shellcheck-test:
 	@echo "Testing for shellcheck"

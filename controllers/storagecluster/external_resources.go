@@ -15,6 +15,7 @@ import (
 	ocsv1 "github.com/openshift/ocs-operator/api/v1"
 	cephv1 "github.com/rook/rook/pkg/apis/ceph.rook.io/v1"
 	corev1 "k8s.io/api/core/v1"
+	storagev1 "k8s.io/api/storage/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -224,8 +225,8 @@ func (r *StorageClusterReconciler) createExternalStorageClusterResources(instanc
 	// this flag sets the 'ROOK_CSI_ENABLE_CEPHFS' flag
 	enableRookCSICephFS := false
 	// this stores only the StorageClasses specified in the Secret
-	availableSCCs := []StorageClassConfiguration{}
-	data, err := r.retrieveExternalSecretData(instance)
+	var availableSCs = make([]*storagev1.StorageClass, 3)
+	data, err := r.retrieveExternalSecretData(instance, reqLogger)
 	if err != nil {
 		r.Log.Error(err, "failed to retrieve external resources")
 		return err
@@ -289,12 +290,17 @@ func (r *StorageClusterReconciler) createExternalStorageClusterResources(instanc
 				return err
 			}
 		case "StorageClass":
-			var scc StorageClassConfiguration
+			index := 0
+			var sc *storagev1.StorageClass
 			if d.Name == cephFsStorageClassName {
-				scc = newCephFilesystemStorageClassConfiguration(instance)
+				// 'sc' points to CephFS StorageClass
+				index = cephFileSystemIndex
+				sc = scs[index]
 				enableRookCSICephFS = true
 			} else if d.Name == cephRbdStorageClassName {
-				scc = newCephBlockPoolStorageClassConfiguration(instance)
+				// 'sc' points to RBD StorageClass
+				index = cephBlockPoolIndex
+				sc = scs[index]
 			} else if d.Name == cephRgwStorageClassName {
 				rgwEndpoint := d.Data[externalCephRgwEndpointKey]
 				if err := checkEndpointReachable(rgwEndpoint, 5*time.Second); err != nil {
@@ -311,14 +317,16 @@ func (r *StorageClusterReconciler) createExternalStorageClusterResources(instanc
 				// https://github.com/rook/rook/issues/6165
 				delete(d.Data, externalCephRgwEndpointKey)
 
-				scc = newCephOBCStorageClassConfiguration(instance)
+				// 'sc' points to OBC StorageClass
+				index = cephObjectStoreIndex
+				sc = scs[index]
 			}
 			// now sc is pointing to appropriate StorageClass,
 			// whose parameters have to be updated
 			for k, v := range d.Data {
 				scc.storageClass.Parameters[k] = v
 			}
-			availableSCCs = append(availableSCCs, scc)
+			availableSCs[index] = sc
 		}
 	}
 	// creating only the available storageClasses

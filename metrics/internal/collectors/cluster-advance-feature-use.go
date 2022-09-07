@@ -1,9 +1,6 @@
 package collectors
 
 import (
-	"fmt"
-	"strings"
-
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/red-hat-storage/ocs-operator/metrics/internal/options"
 	cephv1 "github.com/rook/rook/pkg/apis/ceph.rook.io/v1"
@@ -19,13 +16,25 @@ import (
 	storagev1listers "k8s.io/client-go/listers/storage/v1"
 )
 
+type advancedFeatureType int
+
+const (
+	externalClusterMode advancedFeatureType = iota // 0
+	pvEncryption                                   // 1
+	kmsEncryption                                  // 2
+	rbdMirror                                      // 3
+	// add any advanced feature names above
+	totalNoOfAdvFeatures // +1
+)
+
 type ClusterAdvanceFeatureCollector struct {
 	AdvancedFeature   *prometheus.Desc
 	Informer          cache.SharedIndexInformer
 	AllowedNamespaces []string
-	// advancedFeatureMap will have 'namespace/clusterName' as key and an integer as value.
-	// Value '1' indicates the cluster is using an advanced feature or else '0'.
-	advancedFeatureMap map[string]int
+	// advancedFeature will be set to
+	// '1' if any of the cluster is using an advanced feature
+	// or else it will be set to '0'.
+	advancedFeature []int
 }
 
 const (
@@ -50,12 +59,11 @@ func NewClusterAdvancedFeatureCollector(opts *options.Options) *ClusterAdvanceFe
 		AdvancedFeature: prometheus.NewDesc(
 			prometheus.BuildFQName(namespace, advFeatureSubSystem, "usage"),
 			`Indicates whether the cluster is using any advanced features, like PV/KMS encryption or external cluster mode`,
-			[]string{"ceph_cluster", "namespace"},
-			nil,
+			nil, nil,
 		),
-		Informer:           sharedIndexInformer,
-		AllowedNamespaces:  opts.AllowedNamespaces,
-		advancedFeatureMap: make(map[string]int),
+		Informer:          sharedIndexInformer,
+		AllowedNamespaces: opts.AllowedNamespaces,
+		advancedFeature:   make([]int, totalNoOfAdvFeatures),
 	}
 }
 
@@ -95,84 +103,66 @@ func (c *ClusterAdvanceFeatureCollector) Collect(ch chan<- prometheus.Metric) {
 		c.mapAdvanceFeatureUseFromStorageClasses(storageClasses)
 	}
 
+	cephRBDMirrorLister := cephv1listers.NewCephRBDMirrorLister(c.Informer.GetIndexer())
+	cephRBDMirrors := getAllRBDMirrors(cephRBDMirrorLister, c.AllowedNamespaces)
+	if len(cephRBDMirrors) > 0 {
+		c.mapAdvanceFeatureUseFromCephRBDMirrors(cephRBDMirrors)
+	}
+
 	c.collectAdvancedFeatureUse(ch)
 }
 
-func (c *ClusterAdvanceFeatureCollector) findValidKeyInNamespace(namespace string) string {
-	var validKey string
-	for namespaceNameKey := range c.advancedFeatureMap {
-		// namespaceNameKey is in the format: <namespace>/<clusterName>
-		if strings.HasPrefix(namespaceNameKey, fmt.Sprint(namespace, "/")) {
-			validKey = namespaceNameKey
-			break
-		}
-	}
-	return validKey
-}
-
 func (c *ClusterAdvanceFeatureCollector) mapAdvanceFeatureUseFromCephClusters(cephClusters []*cephv1.CephCluster) {
-	if c.advancedFeatureMap == nil {
-		c.advancedFeatureMap = make(map[string]int)
-	}
 	for _, cephCluster := range cephClusters {
-		// key format: '<namespace>/<cephClusterName>' and
-		key := fmt.Sprint(cephCluster.Namespace, "/", cephCluster.Name)
-		// map to an int value (by default 0)
-		c.advancedFeatureMap[key] = 0
-		if cephCluster.Spec.External.Enable ||
-			cephCluster.Spec.Security.KeyManagementService.IsEnabled() {
-			// if any of the above special/advanced feature is enabled, make the map value 1
-			c.advancedFeatureMap[key] = 1
+		if cephCluster.Spec.External.Enable {
+			c.advancedFeature[externalClusterMode] = 1
+			break
+		} else if cephCluster.Spec.Security.KeyManagementService.IsEnabled() {
+			c.advancedFeature[kmsEncryption] = 1
+			break
 		}
 	}
 }
 
 func (c *ClusterAdvanceFeatureCollector) mapAdvanceFeatureUseFromCephObjectStores(cephObjectStores []*cephv1.CephObjectStore) {
 	for _, cephObjectStore := range cephObjectStores {
-		// first check whether a cluster is available in CephObjectStore's namespace
-		validKey := c.findValidKeyInNamespace(cephObjectStore.Namespace)
-		// if there is no cluster in the namespace, continue with the next
-		if validKey == "" {
-			klog.Errorf("no cephcluster found in namespace: %q. cannot add advanced feature to CephObjectStore: %q", cephObjectStore.Namespace, cephObjectStore.Name)
-			continue
-		}
 		if cephObjectStore.Spec.Security.KeyManagementService.IsEnabled() {
-			c.advancedFeatureMap[validKey] = 1
+			c.advancedFeature[kmsEncryption] = 1
+			break
 		}
 	}
 }
 
 func (c *ClusterAdvanceFeatureCollector) mapAdvanceFeatureUseFromStorageClasses(storageClasses []*storagev1.StorageClass) {
 	for _, storageClass := range storageClasses {
-		// first check whether a cluster is available in CephObjectStore's namespace
-		validKey := c.findValidKeyInNamespace(storageClass.Namespace)
-		// if there is no cluster in the namespace, continue with the next
-		if validKey == "" {
-			klog.Errorf("no cephcluster found in namespace: %q. cannot add advanced feature to StorageClass: %q", storageClass.Namespace, storageClass.Name)
-			continue
-		}
 		if storageClass.Parameters["encrypted"] == "true" {
-			c.advancedFeatureMap[validKey] = 1
+			c.advancedFeature[pvEncryption] = 1
+			break
+		}
+	}
+}
+
+func (c *ClusterAdvanceFeatureCollector) mapAdvanceFeatureUseFromCephRBDMirrors(cephRBDMirrors []*cephv1.CephRBDMirror) {
+	for _, rbdM := range cephRBDMirrors {
+		if rbdM.Spec.Count > 0 {
+			c.advancedFeature[rbdMirror] = 1
+			break
 		}
 	}
 }
 
 func (c *ClusterAdvanceFeatureCollector) collectAdvancedFeatureUse(ch chan<- prometheus.Metric) {
-	if c.advancedFeatureMap == nil {
-		return
+	advFeature := 0
+	for _, v := range c.advancedFeature {
+		advFeature += v
 	}
-	for k, v := range c.advancedFeatureMap {
-		namespaceAndClusterName := strings.Split(k, "/")
-		if len(namespaceAndClusterName) != 2 || namespaceAndClusterName[1] == "" {
-			klog.Errorf("malformated map key: %+v", k)
-			continue
-		}
-		ch <- prometheus.MustNewConstMetric(
-			c.AdvancedFeature,
-			prometheus.GaugeValue, float64(v),
-			namespaceAndClusterName[1], namespaceAndClusterName[0],
-		)
+	if advFeature > 0 {
+		advFeature = 1
 	}
+	ch <- prometheus.MustNewConstMetric(
+		c.AdvancedFeature,
+		prometheus.GaugeValue, float64(advFeature),
+	)
 }
 
 func getAllStorageClasses(
@@ -196,4 +186,25 @@ func getAllStorageClasses(
 		}
 	}
 	return namespacedSCs
+}
+
+func getAllRBDMirrors(lister cephv1listers.CephRBDMirrorLister, namespaces []string) []*cephv1.CephRBDMirror {
+	var err error
+	allRBDMirrors, err := lister.List(labels.Everything())
+	if err != nil {
+		klog.Errorf("couldn't list RBD Mirrors. %v", err)
+		return nil
+	}
+	if len(namespaces) == 0 {
+		return allRBDMirrors
+	}
+	var namespacedRBDMirrors []*cephv1.CephRBDMirror
+	for _, namespace := range namespaces {
+		for _, eachRBDMirror := range allRBDMirrors {
+			if eachRBDMirror.Namespace == namespace {
+				namespacedRBDMirrors = append(namespacedRBDMirrors, eachRBDMirror)
+			}
+		}
+	}
+	return namespacedRBDMirrors
 }

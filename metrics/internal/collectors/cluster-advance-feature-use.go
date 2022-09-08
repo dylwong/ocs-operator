@@ -126,6 +126,7 @@ func (c *ClusterAdvanceFeatureCollector) mapAdvanceFeatureUseFromCephClusters(ce
 			return
 		}
 	}
+	c.advancedFeature = 0
 }
 
 func (c *ClusterAdvanceFeatureCollector) mapAdvanceFeatureUseFromCephObjectStores(cephObjectStores []*cephv1.CephObjectStore) {
@@ -135,6 +136,7 @@ func (c *ClusterAdvanceFeatureCollector) mapAdvanceFeatureUseFromCephObjectStore
 			return
 		}
 	}
+	c.advancedFeature = 0
 }
 
 func (c *ClusterAdvanceFeatureCollector) mapAdvanceFeatureUseFromStorageClasses(storageClasses []*storagev1.StorageClass) {
@@ -144,6 +146,7 @@ func (c *ClusterAdvanceFeatureCollector) mapAdvanceFeatureUseFromStorageClasses(
 			return
 		}
 	}
+	c.advancedFeature = 0
 }
 
 func (c *ClusterAdvanceFeatureCollector) mapAdvanceFeatureUseFromCephRBDMirrors(cephRBDMirrors []*cephv1.CephRBDMirror) {
@@ -153,6 +156,7 @@ func (c *ClusterAdvanceFeatureCollector) mapAdvanceFeatureUseFromCephRBDMirrors(
 			return
 		}
 	}
+	c.advancedFeature = 0
 }
 
 func (c *ClusterAdvanceFeatureCollector) collectAdvancedFeatureUse(ch chan<- prometheus.Metric) {

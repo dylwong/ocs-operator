@@ -16,17 +16,6 @@ import (
 	storagev1listers "k8s.io/client-go/listers/storage/v1"
 )
 
-type advancedFeatureType int
-
-const (
-	externalClusterMode advancedFeatureType = iota // 0
-	pvEncryption                                   // 1
-	kmsEncryption                                  // 2
-	rbdMirror                                      // 3
-	// add any advanced feature names above
-	totalNoOfAdvFeatures // +1
-)
-
 type ClusterAdvanceFeatureCollector struct {
 	AdvancedFeature   *prometheus.Desc
 	Informer          cache.SharedIndexInformer
@@ -34,7 +23,7 @@ type ClusterAdvanceFeatureCollector struct {
 	// advancedFeature will be set to
 	// '1' if any of the cluster is using an advanced feature
 	// or else it will be set to '0'.
-	advancedFeature []int
+	advancedFeature int
 }
 
 const (
@@ -63,7 +52,7 @@ func NewClusterAdvancedFeatureCollector(opts *options.Options) *ClusterAdvanceFe
 		),
 		Informer:          sharedIndexInformer,
 		AllowedNamespaces: opts.AllowedNamespaces,
-		advancedFeature:   make([]int, totalNoOfAdvFeatures),
+		advancedFeature:   0,
 	}
 }
 
@@ -91,16 +80,31 @@ func (c *ClusterAdvanceFeatureCollector) Collect(ch chan<- prometheus.Metric) {
 		c.mapAdvanceFeatureUseFromCephClusters(cephClusters)
 	}
 
+	if c.advancedFeature > 0 {
+		c.collectAdvancedFeatureUse(ch)
+		return
+	}
+
 	cephObjectStoreLister := cephv1listers.NewCephObjectStoreLister(c.Informer.GetIndexer())
 	cephObjectStores := getAllObjectStores(cephObjectStoreLister, c.AllowedNamespaces)
 	if len(cephObjectStores) > 0 {
 		c.mapAdvanceFeatureUseFromCephObjectStores(cephObjectStores)
 	}
 
+	if c.advancedFeature > 0 {
+		c.collectAdvancedFeatureUse(ch)
+		return
+	}
+
 	storageClassLister := storagev1listers.NewStorageClassLister(c.Informer.GetIndexer())
 	storageClasses := getAllStorageClasses(storageClassLister, c.AllowedNamespaces)
 	if len(storageClasses) > 0 {
 		c.mapAdvanceFeatureUseFromStorageClasses(storageClasses)
+	}
+
+	if c.advancedFeature > 0 {
+		c.collectAdvancedFeatureUse(ch)
+		return
 	}
 
 	cephRBDMirrorLister := cephv1listers.NewCephRBDMirrorLister(c.Informer.GetIndexer())
@@ -115,11 +119,11 @@ func (c *ClusterAdvanceFeatureCollector) Collect(ch chan<- prometheus.Metric) {
 func (c *ClusterAdvanceFeatureCollector) mapAdvanceFeatureUseFromCephClusters(cephClusters []*cephv1.CephCluster) {
 	for _, cephCluster := range cephClusters {
 		if cephCluster.Spec.External.Enable {
-			c.advancedFeature[externalClusterMode] = 1
-			break
+			c.advancedFeature = 1
+			return
 		} else if cephCluster.Spec.Security.KeyManagementService.IsEnabled() {
-			c.advancedFeature[kmsEncryption] = 1
-			break
+			c.advancedFeature = 1
+			return
 		}
 	}
 }
@@ -127,8 +131,8 @@ func (c *ClusterAdvanceFeatureCollector) mapAdvanceFeatureUseFromCephClusters(ce
 func (c *ClusterAdvanceFeatureCollector) mapAdvanceFeatureUseFromCephObjectStores(cephObjectStores []*cephv1.CephObjectStore) {
 	for _, cephObjectStore := range cephObjectStores {
 		if cephObjectStore.Spec.Security.KeyManagementService.IsEnabled() {
-			c.advancedFeature[kmsEncryption] = 1
-			break
+			c.advancedFeature = 1
+			return
 		}
 	}
 }
@@ -136,8 +140,8 @@ func (c *ClusterAdvanceFeatureCollector) mapAdvanceFeatureUseFromCephObjectStore
 func (c *ClusterAdvanceFeatureCollector) mapAdvanceFeatureUseFromStorageClasses(storageClasses []*storagev1.StorageClass) {
 	for _, storageClass := range storageClasses {
 		if storageClass.Parameters["encrypted"] == "true" {
-			c.advancedFeature[pvEncryption] = 1
-			break
+			c.advancedFeature = 1
+			return
 		}
 	}
 }
@@ -145,23 +149,16 @@ func (c *ClusterAdvanceFeatureCollector) mapAdvanceFeatureUseFromStorageClasses(
 func (c *ClusterAdvanceFeatureCollector) mapAdvanceFeatureUseFromCephRBDMirrors(cephRBDMirrors []*cephv1.CephRBDMirror) {
 	for _, rbdM := range cephRBDMirrors {
 		if rbdM.Spec.Count > 0 {
-			c.advancedFeature[rbdMirror] = 1
-			break
+			c.advancedFeature = 1
+			return
 		}
 	}
 }
 
 func (c *ClusterAdvanceFeatureCollector) collectAdvancedFeatureUse(ch chan<- prometheus.Metric) {
-	advFeature := 0
-	for _, v := range c.advancedFeature {
-		advFeature += v
-	}
-	if advFeature > 0 {
-		advFeature = 1
-	}
 	ch <- prometheus.MustNewConstMetric(
 		c.AdvancedFeature,
-		prometheus.GaugeValue, float64(advFeature),
+		prometheus.GaugeValue, float64(c.advancedFeature),
 	)
 }
 

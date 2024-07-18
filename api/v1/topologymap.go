@@ -1,4 +1,5 @@
 /*
+From https://github.com/red-hat-storage/ocs-operator/blob/release-4.15/api/v1/topologymap.go
 Copyright 2020 Red Hat OpenShift Container Storage.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -36,6 +37,16 @@ func (m *NodeTopologyMap) Contains(topologyKey string, value string) bool {
 				return true
 			}
 		}
+	}
+
+	return false
+}
+
+// ContainsKey checks whether the NodeTopologyMap contains any value for the
+// specified key
+func (m *NodeTopologyMap) ContainsKey(topologyKey string) bool {
+	if _, ok := m.Labels[topologyKey]; ok {
+		return true
 	}
 
 	return false

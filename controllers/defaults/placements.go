@@ -1,12 +1,18 @@
 package defaults
 
 import (
-	rook "github.com/rook/rook/pkg/apis/rook.io/v1"
+	rookCephv1 "github.com/rook/rook/pkg/apis/ceph.rook.io/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 var (
+	// osdLabelSelector is the key in OSD pod. Used
+	// as a label selector for topology spread constraints.
+	osdLabelSelector = "rook-ceph-osd"
+	// osdPrepareLabelSelector is the key in OSD prepare pod. Used
+	// as a label selector for topology spread constraints.
+	osdPrepareLabelSelector = "rook-ceph-osd-prepare"
 	// appLabelSelectorKey is common value for 'Key' field in 'LabelSelectorRequirement'
 	appLabelSelectorKey = "app"
 	// DefaultNodeAffinity is the NodeAffinity to be used when labelSelector is nil
@@ -15,7 +21,7 @@ var (
 	}
 	// DaemonPlacements map contains the default placement configs for the
 	// various OCS daemons
-	DaemonPlacements = map[string]rook.Placement{
+	DaemonPlacements = map[string]rookCephv1.Placement{
 		"all": {
 			Tolerations: []corev1.Toleration{
 				getOcsToleration(),
@@ -24,8 +30,8 @@ var (
 
 		"mon": {
 			PodAntiAffinity: &corev1.PodAntiAffinity{
-				PreferredDuringSchedulingIgnoredDuringExecution: []corev1.WeightedPodAffinityTerm{
-					getWeightedPodAffinityTerm(100, "rook-ceph-mon"),
+				RequiredDuringSchedulingIgnoredDuringExecution: []corev1.PodAffinityTerm{
+					getPodAffinityTerm("rook-ceph-mon"),
 				},
 			},
 		},
@@ -57,7 +63,7 @@ var (
 				getOcsToleration(),
 			},
 			TopologySpreadConstraints: []corev1.TopologySpreadConstraint{
-				getTopologySpreadConstraintsSpec(1, "rook-ceph-osd"),
+				getTopologySpreadConstraintsSpec(1, []string{osdLabelSelector}),
 			},
 		},
 
@@ -66,9 +72,7 @@ var (
 				getOcsToleration(),
 			},
 			TopologySpreadConstraints: []corev1.TopologySpreadConstraint{
-				// getTopologySpreadConstraintsSpec populates values required for topology spread constraints.
-				// TopologyKey gets updated in newStorageClassDeviceSets after determining it from determineFailureDomain.
-				getTopologySpreadConstraintsSpec(1, "rook-ceph-osd-prepare", "rook-ceph-osd"),
+				getTopologySpreadConstraintsSpec(1, []string{osdLabelSelector, osdPrepareLabelSelector}),
 			},
 		},
 
@@ -77,9 +81,6 @@ var (
 				getOcsToleration(),
 			},
 			PodAntiAffinity: &corev1.PodAntiAffinity{
-				RequiredDuringSchedulingIgnoredDuringExecution: []corev1.PodAffinityTerm{
-					getPodAffinityTerm("rook-ceph-rgw"),
-				},
 				PreferredDuringSchedulingIgnoredDuringExecution: []corev1.WeightedPodAffinityTerm{
 					getWeightedPodAffinityTerm(100, "rook-ceph-rgw"),
 				},
@@ -91,8 +92,19 @@ var (
 				getOcsToleration(),
 			},
 			PodAntiAffinity: &corev1.PodAntiAffinity{
+				PreferredDuringSchedulingIgnoredDuringExecution: []corev1.WeightedPodAffinityTerm{
+					getWeightedPodAffinityTerm(100, "rook-ceph-mds"),
+				},
+			},
+		},
+
+		"nfs": {
+			Tolerations: []corev1.Toleration{
+				getOcsToleration(),
+			},
+			PodAntiAffinity: &corev1.PodAntiAffinity{
 				RequiredDuringSchedulingIgnoredDuringExecution: []corev1.PodAffinityTerm{
-					getPodAffinityTerm("rook-ceph-mds"),
+					getPodAffinityTerm("rook-ceph-nfs"),
 				},
 			},
 		},
@@ -102,10 +114,24 @@ var (
 				getOcsToleration(),
 			},
 		},
+
+		"noobaa-standalone": {
+			Tolerations: []corev1.Toleration{
+				getOcsToleration(),
+			},
+		},
+
+		"rbd-mirror": {
+			Tolerations: []corev1.Toleration{
+				getOcsToleration(),
+			},
+		},
 	}
 )
 
-func getTopologySpreadConstraintsSpec(maxSkew int32, selectorValue ...string) corev1.TopologySpreadConstraint {
+// getTopologySpreadConstraintsSpec populates values required for topology spread constraints.
+// TopologyKey gets updated in newStorageClassDeviceSets after determining it from determineFailureDomain.
+func getTopologySpreadConstraintsSpec(maxSkew int32, valueLabels []string) corev1.TopologySpreadConstraint {
 	topologySpreadConstraints := corev1.TopologySpreadConstraint{
 		MaxSkew:           maxSkew,
 		TopologyKey:       corev1.LabelHostname,
@@ -115,7 +141,7 @@ func getTopologySpreadConstraintsSpec(maxSkew int32, selectorValue ...string) co
 				{
 					Key:      appLabelSelectorKey,
 					Operator: metav1.LabelSelectorOpIn,
-					Values:   selectorValue,
+					Values:   valueLabels,
 				},
 			},
 		},

@@ -27,7 +27,7 @@ spec:
         args:
         - --enable-leader-election
         - "--health-probe-bind-address=:8081"
-        image: quay.io/mulbc/ocs-operator:katacoda-46
+        image: quay.io/dywong/odf-nano-katconda-4.6:latest
         imagePullPolicy: Always
         name: ocs-operator
         env:
@@ -41,4 +41,12 @@ spec:
             port: 8081
           initialDelaySeconds: 5
           periodSeconds: 10
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+              drop:
+              - all
+          readOnlyRootFilesystem: true
       terminationGracePeriodSeconds: 10
+      securityContext:
+        runAsNonRoot: true

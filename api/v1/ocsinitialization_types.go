@@ -29,7 +29,14 @@ type OCSInitializationSpec struct {
 	// should be deployed.
 	// Defaults to false
 	// +optional
+	// +kubebuilder:deprecatedversion:warning="This field doesn't work anymore and will be removed in future. The ceph tool box can be enabled by setting the spec.enableCephTools field in the storage cluster CR"
 	EnableCephTools bool `json:"enableCephTools,omitempty"`
+
+	// Tolerations if specified set toolbox ceph tools pod tolerations
+	// Defaults to empty
+	// +optional
+	// +kubebuilder:deprecatedversion:warning="This field doesn't work anymore and will be removed in future. The tolerations along with any other placement spec are now set by adding them in the storage cluster CR under spec.placement[toolbox]"
+	Tolerations []corev1.Toleration `json:"tolerations,omitempty"`
 }
 
 // OCSInitializationStatus defines the observed state of OCSInitialization
@@ -58,8 +65,9 @@ type OCSInitializationStatus struct {
 // +kubebuilder:printcolumn:name="Age",type=date,JSONPath=.metadata.creationTimestamp
 // +kubebuilder:printcolumn:name="Phase",type=string,JSONPath=.status.phase,description="Current Phase"
 // +kubebuilder:printcolumn:name="Created At",type=string,JSONPath=.metadata.creationTimestamp
+// +operator-sdk:csv:customresourcedefinitions:displayName="OCS Initialization"
 
-// OCSInitialization is the Schema for the ocsinitialization API
+// OCSInitialization represents the initial data to be created when the operator is installed.
 type OCSInitialization struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
@@ -75,8 +83,4 @@ type OCSInitializationList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
 	Items           []OCSInitialization `json:"items"`
-}
-
-func init() {
-	SchemeBuilder.Register(&OCSInitialization{}, &OCSInitializationList{})
 }

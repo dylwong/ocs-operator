@@ -1,4 +1,3 @@
-
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
@@ -6,6 +5,16 @@ metadata:
   creationTimestamp: null
   name: manager-role
 rules:
+- apiGroups:
+  - apiextensions.k8s.io
+  resources:
+  - customresourcedefinitions
+  verbs:
+  - create
+  - get
+  - list
+  - update
+  - watch
 - apiGroups:
   - apps
   resources:
@@ -16,19 +25,88 @@ rules:
   verbs:
   - '*'
 - apiGroups:
+  - batch
+  resources:
+  - cronjobs
+  - jobs
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - update
+  - watch
+- apiGroups:
   - ceph.rook.io
   resources:
+  - cephblockpoolradosnamespaces
   - cephblockpools
   - cephclusters
   - cephfilesystems
+  - cephnfses
   - cephobjectstores
   - cephobjectstoreusers
+  - cephrbdmirrors
   verbs:
   - '*'
+- apiGroups:
+  - ceph.rook.io
+  resources:
+  - cephblockpools
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - update
+  - watch
+- apiGroups:
+  - ceph.rook.io
+  resources:
+  - cephclients
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - update
+  - watch
+- apiGroups:
+  - ceph.rook.io
+  resources:
+  - cephfilesystemsubvolumegroups
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - update
+  - watch
+- apiGroups:
+  - cluster.open-cluster-management.io
+  resources:
+  - clusterclaims
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - update
+  - watch
+- apiGroups:
+  - config.openshift.io
+  resources:
+  - clusterversions
+  - networks
+  verbs:
+  - get
+  - list
+  - watch
 - apiGroups:
   - config.openshift.io
   resources:
   - infrastructures
+  - networks
   verbs:
   - get
   - list
@@ -40,6 +118,15 @@ rules:
   verbs:
   - '*'
 - apiGroups:
+  - coordination.k8s.io
+  resources:
+  - leases
+  verbs:
+  - create
+  - get
+  - list
+  - update
+- apiGroups:
   - ""
   resources:
   - configmaps
@@ -47,8 +134,10 @@ rules:
   - events
   - nodes
   - persistentvolumeclaims
+  - persistentvolumes
   - pods
   - secrets
+  - serviceaccounts
   - services
   verbs:
   - '*'
@@ -65,8 +154,14 @@ rules:
   verbs:
   - get
   - list
-  - patch
-  - update
+  - watch
+- apiGroups:
+  - k8s.cni.cncf.io
+  resources:
+  - network-attachment-definitions
+  verbs:
+  - get
+  - list
   - watch
 - apiGroups:
   - monitoring.coreos.com
@@ -75,6 +170,7 @@ rules:
   - servicemonitors
   verbs:
   - create
+  - delete
   - get
   - list
   - update
@@ -85,6 +181,15 @@ rules:
   - noobaas
   verbs:
   - '*'
+- apiGroups:
+  - objectbucket.io
+  resources:
+  - objectbucketclaims
+  - objectbuckets
+  verbs:
+  - get
+  - list
+  - watch
 - apiGroups:
   - ocs.openshift.io
   resources:
@@ -97,6 +202,101 @@ rules:
   - patch
   - update
   - watch
+- apiGroups:
+  - ocs.openshift.io
+  resources:
+  - storageclassrequests
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - ocs.openshift.io
+  resources:
+  - storageclassrequests/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - ocs.openshift.io
+  resources:
+  - storageclusters
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - ocs.openshift.io
+  resources:
+  - storageconsumers
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - ocs.openshift.io
+  resources:
+  - storageconsumers/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - operators.coreos.com
+  resources:
+  - clusterserviceversions
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - operators.coreos.com
+  resources:
+  - operatorconditions
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - quota.openshift.io
+  resources:
+  - clusterresourcequotas
+  verbs:
+  - '*'
+- apiGroups:
+  - rbac.authorization.k8s.io
+  resources:
+  - clusterrolebindings
+  - clusterroles
+  - rolebindings
+  - roles
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - route.openshift.io
+  resources:
+  - routes
+  verbs:
+  - '*'
 - apiGroups:
   - security.openshift.io
   resources:
@@ -119,6 +319,16 @@ rules:
   - snapshot.storage.k8s.io
   resources:
   - volumesnapshotclasses
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - watch
+- apiGroups:
+  - snapshot.storage.k8s.io
+  resources:
+  - volumesnapshotclasses
   - volumesnapshots
   verbs:
   - '*'
@@ -128,7 +338,13 @@ rules:
   - storageclasses
   verbs:
   - '*'
+  - create
+  - delete
   - get
+  - list
+  - patch
+  - update
+  - watch
 - apiGroups:
   - template.openshift.io
   resources:
